@@ -1,0 +1,1594 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+  - uuid: 8d714322ec35487284c759d7d4b380e4
+    name: Templates/Operating systems
+  templates:
+  - uuid: 401901f7f0004288bd4d265b93d68f71
+    template: Template Lab Escola
+    name: Template Lab Escola
+    description: 'Template Lab Escola - Zabbix 7.4.8
+
+
+      Monitoramento de laboratorio de informatica escolar.
+
+
+      ITENS: CPU, RAM, Disco LLD, Rede LLD, Servicos, Temperatura, Uptime, Hostname,
+      Versao Windows, Usuarios, Ping.
+
+      SEGURANCA: Firewall, USB, Updates, Falhas de Login (Requer UserParameters).
+
+
+      (Monitoramento SMART removido por exigir software externo).'
+    vendor:
+      name: Lab Escola
+      version: 7.4.8-1
+    groups:
+    - name: Templates/Operating systems
+    items:
+    - uuid: 38d54917d6bb4d549b419a77809e1246
+      name: CPU - Utilizacao total
+      key: system.cpu.util
+      value_type: FLOAT
+      units: '%'
+      description: Percentual total de uso da CPU (0 a 100%).
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: bd60ca69e5394a7eb760f72da2e3131e
+      name: CPU - Tempo ocioso (idle)
+      key: perf_counter_en["\Processor(_Total)\% Idle Time"]
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de CPU ociosa via Performance Counter. Mais confiavel
+        que system.cpu.util[,idle] no Windows.
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: 8abfe873f78f4838b73094f7d7ab74b7
+      name: CPU - Carga media 1 minuto
+      key: system.cpu.load[percpu,avg1]
+      value_type: FLOAT
+      description: Carga media por nucleo no ultimo 1 minuto.
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: 53e1111b6b184104aab01b50b80986eb
+      name: CPU - Carga media 5 minutos
+      key: system.cpu.load[percpu,avg5]
+      delay: 5m
+      value_type: FLOAT
+      description: Carga media por nucleo nos ultimos 5 minutos.
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: 53555024b3c048e18142f90c158c2a8f
+      name: CPU - Numero de nucleos
+      key: system.cpu.num
+      delay: 1h
+      description: Total de nucleos e threads. Coletado uma vez por hora.
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: 239fb5d5afbf49b6977fdde35b0a910f
+      name: Processos - Total em execucao
+      key: proc.num[]
+      delay: 2m
+      description: Total de processos ativos. Acima de 350 pode indicar problema.
+      tags:
+      - tag: component
+        value: os
+    - uuid: 0a9420f09d1e4439b3ac9a63d89c71fa
+      name: Processos - Windows Defender (MsMpEng)
+      key: proc.num[MsMpEng.exe]
+      delay: 5m
+      description: Instancias do processo do Windows Defender. Zero = antivirus nao
+        esta rodando.
+      tags:
+      - tag: component
+        value: security
+    - uuid: 64dbb6541cb34a2c8e08404b94079eb5
+      name: RAM - Disponivel (bytes)
+      key: vm.memory.size[available]
+      units: B
+      description: RAM disponivel em bytes.
+      tags:
+      - tag: component
+        value: memory
+    - uuid: 934ddabe6c4d41c6b03db9d486329cc9
+      name: RAM - Total instalada (bytes)
+      key: vm.memory.size[total]
+      delay: 1h
+      units: B
+      description: RAM total instalada. Coletado uma vez por hora.
+      tags:
+      - tag: component
+        value: memory
+    - uuid: 1cdd2c79142341f98a5f346970b27292
+      name: RAM - Disponivel (%)
+      key: vm.memory.size[pavailable]
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de RAM disponivel. Principal metrica para alertas de
+        memoria.
+      tags:
+      - tag: component
+        value: memory
+    - uuid: 100effe294334041bc89de1a0f94d513
+      name: RAM - Em uso (%)
+      key: vm.memory.size[pused]
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de RAM em uso.
+      tags:
+      - tag: component
+        value: memory
+    - uuid: af8bd1ea306a4e2e817ec3796b491810
+      name: RAM - Paginas por segundo
+      key: perf_counter_en["\Memory\Pages/sec"]
+      delay: 2m
+      value_type: FLOAT
+      description: Taxa de paginacao. Acima de 1000 indica falta de RAM.
+      tags:
+      - tag: component
+        value: memory
+    - uuid: 66f5dfaf7c00479baba33c71b1044d75
+      name: Sistema - Uptime
+      key: system.uptime
+      delay: 30s
+      units: uptime
+      description: Tempo que o PC esta ligado. Abaixo de 5min indica reinicio recente.
+      tags:
+      - tag: component
+        value: system
+    - uuid: ee1d6f81c8614b73baf4196b8aff3712
+      name: Sistema - Horario local
+      key: system.localtime
+      units: unixtime
+      description: Horario local do PC. Usado para detectar relogios desincronizados.
+      tags:
+      - tag: component
+        value: system
+    - uuid: e4e5433fd52c4297993200bdd299f75a
+      name: Zabbix agent - Disponibilidade
+      type: INTERNAL
+      key: zabbix[host,agent,available]
+      description: Status de disponibilidade do agente Zabbix.
+      valuemap:
+        name: Zabbix agent availability
+      tags:
+      - tag: component
+        value: system
+    - uuid: e64405aa5d024c21b80ae2f0cf19ec84
+      name: Servico - Print Spooler
+      key: service.info[Spooler,state]
+      delay: 2m
+      description: Estado do Print Spooler. 0=Running(OK). Outros valores = problema.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: services
+    - uuid: 22a3f16a2ccf46a59ddeb9390d993614
+      name: Servico - Windows Defender Antivirus
+      key: service.info[WinDefend,state]
+      delay: 5m
+      description: Estado do Windows Defender. Parado = PC sem antivirus.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: security
+    - uuid: 1f3c67de4cd74a6492ebdd60a7056b07
+      name: Servico - Windows Update
+      key: service.info[wuauserv,state]
+      delay: 5m
+      description: Estado do Windows Update. Parado impede atualizacoes de seguranca.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: services
+    - uuid: 0f6007fdcc024f22b6637ae5af927333
+      name: Servico - Windows Time
+      key: service.info[W32Time,state]
+      delay: 5m
+      description: Estado do servico de sincronizacao de horario.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: services
+    - uuid: 363030c926734736811d5f6a6fc2f358
+      name: Temperatura - CPU raw WMI (decikelvin)
+      key: wmi.get[root/WMI,"SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature"]
+      delay: 2m
+      description: 'Temperatura bruta em decikelvin via WMI. ATENCAO: Pode nao ser
+        suportado em todos os hardwares. Se aparecer como nao suportado, use o UserParameter
+        alternativo: UserParameter=temperatura.cpu.celsius,powershell -NoProfile -NonInteractive
+        -command "try{[math]::Round(((Get-WmiObject MSAcpi_ThermalZoneTemperature
+        -Namespace root/WMI).CurrentTemperature - 2732) / 10, 1)}catch{-1}" e crie
+        um item com key temperatura.cpu.celsius e type ZABBIX_PASSIVE.'
+      tags:
+      - tag: component
+        value: hardware
+      status: DISABLED
+    - uuid: a3ee252add694347a9d70c8e10b237f2
+      name: Temperatura - CPU (Celsius)
+      type: DEPENDENT
+      key: temperatura.cpu.celsius
+      value_type: FLOAT
+      units: C
+      description: Temperatura da CPU em Celsius. Convertida do raw WMI via JavaScript
+        preprocessing.
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - return (value * 0.1) - 273.2;
+      master_item:
+        key: wmi.get[root/WMI,"SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature"]
+      tags:
+      - tag: component
+        value: hardware
+      status: DISABLED
+    - uuid: b047c7fe08f54ef0b839031d7da2ce0b
+      name: Windows - Atualizacoes pendentes
+      key: windows.updates.pending
+      delay: 6h
+      description: Quantidade de atualizacoes pendentes. REQUER UserParameter - veja
+        descricao do template.
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: 749f4dd0b61d4e11b74fc1a0b9531fe5
+      name: Windows - Status de ativacao
+      key: windows.activation.status
+      delay: 1h
+      description: Status de ativacao do Windows. 1=Ativado 0=NAO ativado -1=Erro.
+        REQUER UserParameter - veja descricao do template.
+      valuemap:
+        name: Windows activation status
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: db24033e85bd4d549595c1cb6c75f139
+      name: Filesystems - Get data (fonte LLD)
+      key: vfs.fs.get
+      history: 1h
+      value_type: TEXT
+      description: Dados brutos de todas as particoes. Fonte para discovery rule de
+        disco.
+      tags:
+      - tag: component
+        value: raw
+    - uuid: 72b197d882a2408bb40a9df3b8399cf3
+      name: Rede - WMI get interfaces (fonte LLD)
+      key: wmi.getall[root\cimv2,"select Name,Description,NetConnectionID,Speed,AdapterTypeId,NetConnectionStatus,GUID
+        from win32_networkadapter where PhysicalAdapter=True and NetConnectionStatus>0"]
+      history: 1h
+      value_type: TEXT
+      description: Dados brutos das interfaces via WMI. Fonte para discovery rule
+        de rede.
+      preprocessing:
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1h
+      tags:
+      - tag: component
+        value: raw
+    - uuid: 2b2d96a29fd445578f55670d9509c8b8
+      name: CPU - Uso por programas do usuario (%)
+      key: perf_counter_en["\Processor(_Total)\% User Time"]
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de CPU usada por programas via Performance Counter.
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: 7b3ae01886d84c9e9cb5e1923bd741e0
+      name: CPU - Uso pelo sistema Windows (%)
+      key: system.cpu.util[,system]
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de CPU consumido pelo proprio Windows (drivers, kernel).
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: b751e11dab0f434eb43b38aa4040efa8
+      name: Sistema - Timestamp do ultimo boot (WMI)
+      key: wmi.get[root/cimv2,"SELECT LastBootUpTime FROM Win32_OperatingSystem"]
+      delay: 10m
+      description: 'Data e hora do ultimo reinicio do PC. NOTA: Requer Zabbix Agent
+        2 v7.4.8. Se nao suportado, reinicie o servico do agente.'
+      tags:
+      - tag: component
+        value: system
+      value_type: TEXT
+    - uuid: bb148bc6a5a34b3f88303ffd2caff8d3
+      name: Servico - Audio do Windows (AudioSrv)
+      key: service.info[AudioSrv,state]
+      delay: 5m
+      description: Estado do servico de audio. 0=Running(OK). Parado = sem som no
+        laboratorio.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: services
+    - uuid: 685bf2b4219a4ef0b46d740ad3f2ec73
+      name: Servico - Log de Eventos (EventLog)
+      key: service.info[EventLog,state]
+      delay: 5m
+      description: Estado do servico de Log de Eventos. Parado impede registro de
+        erros criticos.
+      valuemap:
+        name: Windows service state
+      tags:
+      - tag: component
+        value: services
+    - uuid: 4e62c76b968b4645b52ce1964a9e82a0
+      name: Event Log - Erros criticos no System
+      type: ZABBIX_ACTIVE
+      key: eventlog[System,,Error,,,,skip]
+      delay: 2m
+      value_type: LOG
+      description: Coleta erros criticos do Event Viewer canal System. Requer ServerActive=
+        configurado no agente.
+      tags:
+      - tag: component
+        value: system
+    - uuid: 1829fbbe85de4852808cd23c8b891591
+      name: Event Log - Falhas de autenticacao (ID 4625)
+      type: ZABBIX_ACTIVE
+      key: eventlog[Security,,'Failure Audit',,4625,,skip]
+      delay: 1m
+      value_type: LOG
+      description: Coleta eventos de falha de login (Event ID 4625). Requer ServerActive=
+        configurado no agente.
+      tags:
+      - tag: component
+        value: security
+    - uuid: ece7c4f2e7d0459f835c4d331b12ba85
+      name: Seguranca - Estado antivirus (SecurityCenter WMI)
+      key: wmi.get[root/SecurityCenter2,"SELECT productState FROM AntiVirusProduct
+        WHERE displayName='Windows Defender'"]
+      delay: 30m
+      description: Estado via SecurityCenter2. 397568=Ativo OK | 397312=Desativado
+        | 393472=Desatualizado.
+      tags:
+      - tag: component
+        value: security
+    - uuid: 7790852cc98144bf9333cbd941ceb1c3
+      name: Sistema - Quantidade de usuarios logados
+      key: system.users.num
+      delay: 2m
+      description: Numero de usuarios com sessao ativa. Util para saber se o PC esta
+        em uso.
+      tags:
+      - tag: component
+        value: system
+    - uuid: 54682859c5e64506a3d7992eee9ae09d
+      name: Sistema - Nome do usuario logado
+      key: wmi.get[root/cimv2,"SELECT UserName FROM Win32_ComputerSystem"]
+      delay: 5m
+      value_type: TEXT
+      description: 'Usuario atual logado no PC (formato: DOMINIO\usuario).'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 87f0734d1ffd4b28ae0cce4565335903
+      name: Disco - Velocidade de leitura (bytes/s)
+      key: perf_counter_en["\LogicalDisk(_Total)\Disk Read Bytes/sec"]
+      delay: 1m
+      value_type: FLOAT
+      units: Bps
+      description: Taxa de leitura total do disco em bytes por segundo.
+      tags:
+      - tag: component
+        value: storage
+    - uuid: 86a1ece44fb34f618ba8d07da504d043
+      name: Disco - Velocidade de escrita (bytes/s)
+      key: perf_counter_en["\LogicalDisk(_Total)\Disk Write Bytes/sec"]
+      delay: 1m
+      value_type: FLOAT
+      units: Bps
+      description: Taxa de escrita total do disco em bytes por segundo.
+      tags:
+      - tag: component
+        value: storage
+    - uuid: be99dee25adb436d8f1847a261ad1644
+      name: Disco - Percentual de tempo ocupado (IOPS)
+      key: perf_counter_en["\LogicalDisk(_Total)\% Disk Time"]
+      delay: 1m
+      value_type: FLOAT
+      units: '%'
+      description: Percentual do tempo que o disco ficou ocupado. Acima de 80% indica
+        saturacao.
+      tags:
+      - tag: component
+        value: storage
+    - uuid: dd61e382c83248eaafbb69444b3b0dfb
+      name: Sistema - Versao do Windows
+      key: system.sw.os
+      delay: 1h
+      value_type: TEXT
+      description: 'Versao completa do Windows. Ex: Windows 10 Pro 22H2.'
+      preprocessing:
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1d
+      tags:
+      - tag: component
+        value: system
+    - uuid: a6efe0a1ccd24dc48b42384cd225b361
+      name: Sistema - Nome do computador (hostname)
+      key: system.hostname
+      delay: 1h
+      value_type: TEXT
+      description: Nome do computador conforme configurado no Windows.
+      preprocessing:
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1d
+      tags:
+      - tag: component
+        value: system
+    - uuid: 8b587f7ac0844baebc40e4c6368c19e2
+      name: Agente - Versao do Zabbix Agent
+      key: agent.version
+      delay: 1h
+      value_type: TEXT
+      description: Versao do Zabbix Agent instalado. Util para verificar uniformidade
+        entre os PCs.
+      preprocessing:
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1d
+      tags:
+      - tag: component
+        value: system
+    - uuid: 24c8debe456f44a2af8b1587eb677684
+      name: Agente - Ping (heartbeat)
+      key: agent.ping
+      description: O agente sempre retorna 1. Usado com nodata() para verificar disponibilidade.
+      valuemap:
+        name: Zabbix agent ping status
+      tags:
+      - tag: component
+        value: system
+    - uuid: 1f5b151240dc4d84925a5f63acf212bc
+      name: Rede - Ping para o servidor Zabbix (online/offline)
+      key: icmpping
+      delay: 30s
+      description: Verifica se o PC esta online. 1=online, 0=offline. Base para a
+        trigger de PC offline.
+      valuemap:
+        name: Zabbix agent ping status
+      tags:
+      - tag: component
+        value: network
+      type: SIMPLE
+    - uuid: 2ef7d1b794d24fa299d9b9d6d5c46570
+      name: Rede - Perda de pacotes (%)
+      key: icmppingloss
+      delay: 1m
+      value_type: FLOAT
+      units: '%'
+      description: Percentual de pacotes ICMP perdidos. Acima de 20% indica problema
+        fisico na rede (cabo, switch).
+      tags:
+      - tag: component
+        value: network
+      type: SIMPLE
+    - uuid: 55d5c401eb1443bfa9203e49020fe586
+      name: Rede - Latencia do ping (segundos)
+      key: icmppingsec
+      delay: 1m
+      value_type: FLOAT
+      units: s
+      description: Tempo de resposta do ping em segundos. Acima de 0.2s indica rede
+        lenta.
+      tags:
+      - tag: component
+        value: network
+      type: SIMPLE
+    - uuid: 75ca42f4dcdd436496b404b20afde325
+      name: Rede - Ping para internet (8.8.8.8)
+      key: icmpping[8.8.8.8]
+      delay: 1m
+      description: Verifica se o PC tem acesso a internet. 1=internet OK, 0=sem internet.
+        Diferencia "PC offline" de "internet da escola caiu".
+      valuemap:
+        name: Zabbix agent ping status
+      tags:
+      - tag: component
+        value: network
+      type: SIMPLE
+    - uuid: ca9f090aa93544aabb0daed0a7795313
+      name: Rede - Latencia para internet (8.8.8.8)
+      key: icmppingsec[8.8.8.8]
+      delay: 1m
+      value_type: FLOAT
+      units: s
+      description: Tempo de resposta do ping para o DNS do Google em segundos.
+      tags:
+      - tag: component
+        value: network
+      type: SIMPLE
+    - uuid: ed3697f0cd2e471cbc53837864f996c3
+      name: Seguranca - Firewall do Windows (perfis ativos)
+      key: windows.firewall.status
+      delay: 5m
+      description: 'Verifica quantos perfis do firewall estao ativos (Domain, Private,
+        Public). Valor esperado: 3 (todos ativos). REQUER UserParameter no agente:
+
+        UserParameter=windows.firewall.status,powershell -NoProfile -NonInteractive
+        -command "(Get-NetFirewallProfile | Where-Object {$_.Enabled -eq $true} |
+        Measure-Object).Count"'
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: 676bcda079f14fc8ab0e5bec74d0d279
+      name: Seguranca - Dispositivos USB conectados
+      key: windows.usb.count
+      delay: 2m
+      description: 'Conta dispositivos USB de armazenamento conectados ao PC. Qualquer
+        valor acima de 0 pode indicar pendrive conectado por aluno. REQUER UserParameter
+        no agente:
+
+        UserParameter=windows.usb.count,powershell -NoProfile -NonInteractive -command
+        "(Get-PnpDevice -Class USB | Where-Object {$_.Status -eq ''OK'' -and $_.FriendlyName
+        -like ''*storage*''} | Measure-Object).Count"'
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: 61018d7d2b3a4d109b4d82111a8c606a
+      name: Seguranca - Defender protecao em tempo real
+      key: windows.defender.realtime
+      delay: 10m
+      description: 'Verifica se a protecao em tempo real do Defender esta ativa. 1=ativa
+        (OK), 0=desativada (ALERTA). REQUER UserParameter no agente:
+
+        UserParameter=windows.defender.realtime,powershell -NoProfile -NonInteractive
+        -command "try{[int](Get-MpComputerStatus).RealTimeProtectionEnabled}catch{-1}"'
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: a801348b6e8a4e138b7bb5d48505d054
+      name: Seguranca - Defender dias desde ultima atualizacao
+      key: windows.defender.daysoutdated
+      delay: 1h
+      description: 'Retorna quantos dias se passaram desde a ultima atualizacao das
+        definicoes do Defender. Acima de 3 dias indica definicoes desatualizadas.
+        REQUER UserParameter no agente:
+
+        UserParameter=windows.defender.daysoutdated,powershell -NoProfile -NonInteractive
+        -command "try{[int]([datetime]::Now - (Get-MpComputerStatus).AntivirusSignatureLastUpdated).TotalDays}catch{-1}"'
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: 89e1aaa8ad134eb8baab86c7e1cb7cc8
+      name: Seguranca - Falhas de login na ultima hora (contador)
+      key: windows.login.failures
+      delay: 5m
+      description: 'Conta tentativas de login falhas (Event ID 4625) na ultima hora.
+        Mais de 10 em pouco tempo pode indicar tentativa de invasao. REQUER UserParameter
+        no agente:
+
+        UserParameter=windows.login.failures,powershell -NoProfile -NonInteractive
+        -command "try{([System.Diagnostics.EventLog]::GetEventLogs() | Where-Object
+        {$_.Log -eq ''Security''} | Select-Object -First 1).Entries | Where-Object
+        {$_.EventID -eq 4625 -and $_.TimeWritten -gt (Get-Date).AddHours(-1)} | Measure-Object
+        | Select-Object -ExpandProperty Count}catch{0}"'
+      tags:
+      - tag: component
+        value: security
+      value_type: TEXT
+    - uuid: 70dd7409f24b4cdfba9e944a27ddaf74
+      name: Performance - Top processo por CPU
+      key: windows.top.process
+      delay: 5m
+      value_type: TEXT
+      description: 'Retorna o nome do processo que mais consome CPU no momento. Util
+        para diagnosticar PC lento. REQUER UserParameter no agente:
+
+        UserParameter=windows.top.process,powershell -NoProfile -NonInteractive -command
+        "(Get-Process | Sort-Object CPU -Descending | Select-Object -First 1).ProcessName"'
+      tags:
+      - tag: component
+        value: cpu
+    discovery_rules:
+    - uuid: 24f214afe6304fc4aa0ae1bb9fd75e48
+      name: Disco - Descoberta automatica de particoes
+      type: DEPENDENT
+      key: vfs.fs.dependent.discovery
+      description: Descobre automaticamente todas as particoes fixas e cria itens
+        para cada uma. Aguarde 5 a 10 minutos para os itens aparecerem.
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#FSDRIVETYPE}'
+          value: fixed
+        - macro: '{#FSDRIVETYPE}'
+          value: ^\s$
+          operator: NOT_MATCHES_REGEX
+        - macro: '{#FSNAME}'
+          value: .*
+        - macro: '{#FSNAME}'
+          value: ^(?:/dev|/sys|/run|/proc|.+/shm$)
+          operator: NOT_MATCHES_REGEX
+      item_prototypes:
+      - uuid: 0bcc431e7b6f4455a84711742d350d6c
+        name: Disco {#FSLABEL}({#FSNAME}) - Dados brutos
+        type: DEPENDENT
+        key: vfs.fs.dependent[{#FSNAME},data]
+        history: 1h
+        value_type: TEXT
+        description: Dados intermediarios da particao.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $.[?(@.fsname=='{#FSNAME}')].first()
+        master_item:
+          key: vfs.fs.get
+        tags:
+        - tag: component
+          value: storage
+        - tag: filesystem
+          value: '{#FSNAME}'
+      - uuid: db3b7c34081d459fb8d5dc5ae5e5e33b
+        name: Disco {#FSLABEL}({#FSNAME}) - Espaco livre (bytes)
+        type: DEPENDENT
+        key: vfs.fs.dependent.size[{#FSNAME},free]
+        units: B
+        description: Espaco livre em bytes.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $.bytes.free
+        master_item:
+          key: vfs.fs.dependent[{#FSNAME},data]
+        tags:
+        - tag: component
+          value: storage
+        - tag: filesystem
+          value: '{#FSNAME}'
+      - uuid: a652ad8a0d1547dc9cf8600e68b921c5
+        name: Disco {#FSLABEL}({#FSNAME}) - Total (bytes)
+        type: DEPENDENT
+        key: vfs.fs.dependent.size[{#FSNAME},total]
+        units: B
+        description: Tamanho total da particao em bytes.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $.bytes.total
+        master_item:
+          key: vfs.fs.dependent[{#FSNAME},data]
+        tags:
+        - tag: component
+          value: storage
+        - tag: filesystem
+          value: '{#FSNAME}'
+      - uuid: 143c839ab9ae4b0ba99a3f2cc51fb946
+        name: Disco {#FSLABEL}({#FSNAME}) - Em uso (bytes)
+        type: DEPENDENT
+        key: vfs.fs.dependent.size[{#FSNAME},used]
+        units: B
+        description: Espaco usado em bytes.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $.bytes.used
+        master_item:
+          key: vfs.fs.dependent[{#FSNAME},data]
+        tags:
+        - tag: component
+          value: storage
+        - tag: filesystem
+          value: '{#FSNAME}'
+      - uuid: c395c31297f6474283ad9829645fbc59
+        name: Disco {#FSLABEL}({#FSNAME}) - Em uso (%)
+        type: DEPENDENT
+        key: vfs.fs.dependent.size[{#FSNAME},pused]
+        value_type: FLOAT
+        units: '%'
+        description: Percentual de espaco usado. Principal metrica para alertas de
+          disco.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $.bytes.pused
+        master_item:
+          key: vfs.fs.dependent[{#FSNAME},data]
+        tags:
+        - tag: component
+          value: storage
+        - tag: filesystem
+          value: '{#FSNAME}'
+        trigger_prototypes:
+        - uuid: fe26e84e2f7d49da88947eb654b380a4
+          expression: min(/Template Lab Escola/vfs.fs.dependent.size[{#FSNAME},pused],5m)>98
+          name: 'Disco {#FSLABEL}({#FSNAME}) - DISASTER: praticamente cheio em {HOST.NAME}'
+          priority: DISASTER
+          description: Menos de 2% de espaco livre. O Windows pode travar.
+          manual_close: 'YES'
+          tags:
+          - tag: scope
+            value: capacity
+        - uuid: 9898db413f304a659edc56603b34154a
+          expression: min(/Template Lab Escola/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT}
+          recovery_mode: RECOVERY_EXPRESSION
+          recovery_expression: min(/Template Lab Escola/vfs.fs.dependent.size[{#FSNAME},pused],5m)<{$VFS.FS.PUSED.MAX.CRIT}-3
+          name: Disco {#FSLABEL}({#FSNAME}) - Espaco critico em {HOST.NAME}
+          priority: HIGH
+          description: Uso de disco acima do limite critico ({$VFS.FS.PUSED.MAX.CRIT}%,
+            padrao 90%).
+          manual_close: 'YES'
+          tags:
+          - tag: scope
+            value: capacity
+        - uuid: 637ba78ce15a4cc19f5f9f96486bcadb
+          expression: min(/Template Lab Escola/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.WARN}
+          recovery_mode: RECOVERY_EXPRESSION
+          recovery_expression: min(/Template Lab Escola/vfs.fs.dependent.size[{#FSNAME},pused],5m)<{$VFS.FS.PUSED.MAX.WARN}-3
+          name: Disco {#FSLABEL}({#FSNAME}) - Espaco em aviso em {HOST.NAME}
+          priority: WARNING
+          description: Uso de disco acima do limite de aviso ({$VFS.FS.PUSED.MAX.WARN}%,
+            padrao 80%).
+          manual_close: 'YES'
+          tags:
+          - tag: scope
+            value: capacity
+      graph_prototypes:
+      - uuid: 16dcbf1fe03d4bfda302550874b7bc7a
+        name: Disco {#FSLABEL}({#FSNAME}) - Uso de espaco (%)
+        width: '600'
+        height: '340'
+        ymin_type_1: FIXED
+        ymax_type_1: FIXED
+        graph_items:
+        - drawtype: FILLED_REGION
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: Template Lab Escola
+            key: vfs.fs.dependent.size[{#FSNAME},pused]
+      master_item:
+        key: vfs.fs.get
+      lld_macro_paths:
+      - lld_macro: '{#FSDRIVETYPE}'
+        path: $.fsdrivetype
+      - lld_macro: '{#FSLABEL}'
+        path: $.fslabel
+      - lld_macro: '{#FSNAME}'
+        path: $.fsname
+      - lld_macro: '{#FSTYPE}'
+        path: $.fstype
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "var filesystems = JSON.parse(value);\nresult = filesystems.map(function(fs)\
+          \ {\n  return {'fsname': fs.fsname, 'fstype': fs.fstype, 'fslabel': fs.fslabel,\
+          \ 'fsdrivetype': fs.fsdrivetype};\n});\nreturn JSON.stringify(result);"
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1h
+    - uuid: 9164a23892364de9a18336309eb64c77
+      name: Rede - Descoberta automatica de interfaces
+      type: DEPENDENT
+      key: net.if.discovery
+      description: Descobre automaticamente interfaces de rede fisicas e ativas.
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#IFNAME}'
+          value: .*
+        - macro: '{#IFNAME}'
+          value: Miniport|Virtual|Teredo|Kernel|Loopback|Bluetooth|6to4|QoS
+          operator: NOT_MATCHES_REGEX
+      item_prototypes:
+      - uuid: bb7ae9e1608c4dfba59dc1cb1f6bde02
+        name: Rede {#IFNAME}({#IFALIAS}) - Bits recebidos
+        key: net.if.in["{#IFGUID}"]
+        delay: 1m
+        units: bps
+        description: Trafego de entrada em bits por segundo.
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+      - uuid: f8a40be36fc14defab8280ac188b80ad
+        name: Rede {#IFNAME}({#IFALIAS}) - Bits enviados
+        key: net.if.out["{#IFGUID}"]
+        delay: 1m
+        units: bps
+        description: Trafego de saida em bits por segundo.
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+      - uuid: 6f3fd95162af43fba98f829e6e85449b
+        name: Rede {#IFNAME}({#IFALIAS}) - Erros de entrada
+        key: net.if.in["{#IFGUID}",errors]
+        delay: 2m
+        description: Pacotes recebidos com erro. Valor alto indica cabo ou switch
+          com problema.
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+      - uuid: 22a472106f0f4835801d88935458e5d9
+        name: Rede {#IFNAME}({#IFALIAS}) - Erros de saida
+        key: net.if.out["{#IFGUID}",errors]
+        delay: 2m
+        description: Pacotes enviados com erro.
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+      - uuid: 62a7c02eabac4f0e9310f3b5d241504f
+        name: Rede {#IFNAME}({#IFALIAS}) - Velocidade
+        type: DEPENDENT
+        key: net.if.speed["{#IFGUID}"]
+        trends: '0'
+        units: bps
+        description: Velocidade estimada da interface.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $[?(@.GUID == "{#IFGUID}")].Speed.first()
+          error_handler: CUSTOM_VALUE
+          error_handler_params: '0'
+        - type: JAVASCRIPT
+          parameters:
+          - 'return (value==''9223372036854775807'' ? 0 : value)'
+        - type: DISCARD_UNCHANGED_HEARTBEAT
+          parameters:
+          - 1h
+        master_item:
+          key: wmi.getall[root\cimv2,"select Name,Description,NetConnectionID,Speed,AdapterTypeId,NetConnectionStatus,GUID
+            from win32_networkadapter where PhysicalAdapter=True and NetConnectionStatus>0"]
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+      - uuid: be9cb4dbf4ed410b878e8ae54210117c
+        name: Rede {#IFNAME}({#IFALIAS}) - Status operacional
+        type: DEPENDENT
+        key: net.if.status["{#IFGUID}"]
+        trends: '0'
+        description: 2=Conectado(OK). Outros valores indicam problema.
+        valuemap:
+          name: Win32_NetworkAdapter NetConnectionStatus
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $[?(@.GUID == "{#IFGUID}")].NetConnectionStatus.first()
+        - type: DISCARD_UNCHANGED_HEARTBEAT
+          parameters:
+          - 1d
+        master_item:
+          key: wmi.getall[root\cimv2,"select Name,Description,NetConnectionID,Speed,AdapterTypeId,NetConnectionStatus,GUID
+            from win32_networkadapter where PhysicalAdapter=True and NetConnectionStatus>0"]
+        tags:
+        - tag: component
+          value: network
+        - tag: interface
+          value: '{#IFNAME}'
+        trigger_prototypes:
+        - uuid: d606723be8f94875af400b9d5aa9617b
+          expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Template Lab Escola/net.if.status["{#IFGUID}"])<>2
+            and (last(/Template Lab Escola/net.if.status["{#IFGUID}"],#1)<>last(/Template
+            Lab Escola/net.if.status["{#IFGUID}"],#2))'
+          recovery_mode: RECOVERY_EXPRESSION
+          recovery_expression: last(/Template Lab Escola/net.if.status["{#IFGUID}"])=2
+            or {$IFCONTROL:"{#IFNAME}"}=0
+          name: Interface {#IFNAME}({#IFALIAS}) - Desconectada em {HOST.NAME}
+          priority: AVERAGE
+          description: Interface de rede desconectada. Verifique cabo ou porta do
+            switch.
+          manual_close: 'YES'
+          tags:
+          - tag: scope
+            value: availability
+      trigger_prototypes:
+      - uuid: f614be32d7c94478bafb846dd62b3069
+        expression: min(/Template Lab Escola/net.if.in["{#IFGUID}",errors],5m)>50
+          or min(/Template Lab Escola/net.if.out["{#IFGUID}",errors],5m)>50
+        recovery_mode: RECOVERY_EXPRESSION
+        recovery_expression: max(/Template Lab Escola/net.if.in["{#IFGUID}",errors],5m)<10
+          and max(/Template Lab Escola/net.if.out["{#IFGUID}",errors],5m)<10
+        name: Interface {#IFNAME}({#IFALIAS}) - Alta taxa de erros em {HOST.NAME}
+        priority: WARNING
+        description: Mais de 50 erros/seg na interface. Indica problema fisico de
+          rede.
+        manual_close: 'YES'
+        tags:
+        - tag: scope
+          value: availability
+      graph_prototypes:
+      - uuid: 47cc17b99d6f4dbc982da892687fe608
+        name: Rede {#IFNAME}({#IFALIAS}) - Trafego
+        graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: Template Lab Escola
+            key: net.if.in["{#IFGUID}"]
+        - sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: F63100
+          item:
+            host: Template Lab Escola
+            key: net.if.out["{#IFGUID}"]
+      master_item:
+        key: wmi.getall[root\cimv2,"select Name,Description,NetConnectionID,Speed,AdapterTypeId,NetConnectionStatus,GUID
+          from win32_networkadapter where PhysicalAdapter=True and NetConnectionStatus>0"]
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - "output = JSON.parse(value).map(function(net){\n  return {\n    \"{#IFNAME}\"\
+          : net.Name,\n    \"{#IFDESCR}\": net.Description,\n    \"{#IFALIAS}\": net.NetConnectionID,\n\
+          \    \"{#IFGUID}\": net.GUID\n  }\n})\nreturn JSON.stringify({\"data\":\
+          \ output})"
+      - type: DISCARD_UNCHANGED_HEARTBEAT
+        parameters:
+        - 1h
+    tags:
+    - tag: class
+      value: os
+    - tag: target
+      value: windows
+    - tag: vendor
+      value: lab-escola
+    macros:
+    - macro: '{$AGENT.TIMEOUT}'
+      value: 3m
+      description: Timeout do agente.
+    - macro: '{$CPU.UTIL.CRIT}'
+      value: '90'
+      description: 'Limite critico de CPU (%). Padrao: 90.'
+    - macro: '{$CPU.TEMP.WARN}'
+      value: '70'
+      description: 'Temperatura de aviso CPU (C). Padrao: 70.'
+    - macro: '{$CPU.TEMP.CRIT}'
+      value: '85'
+      description: 'Temperatura critica CPU (C). Padrao: 85.'
+    - macro: '{$MEMORY.UTIL.MAX}'
+      value: '90'
+      description: 'Limite de RAM usada (%). Padrao: 90.'
+    - macro: '{$VFS.FS.PUSED.MAX.WARN}'
+      value: '80'
+      description: 'Aviso de disco usado (%). Padrao: 80.'
+    - macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+      value: '90'
+      description: 'Critico de disco usado (%). Padrao: 90.'
+    - macro: '{$IFCONTROL}'
+      value: '1'
+      description: 1=monitorar queda de interface, 0=ignorar.
+    - macro: '{$WINDOWS.UPDATES.MAX}'
+      value: '10'
+      description: 'Max atualizacoes pendentes antes do alerta. Padrao: 10.'
+    dashboards:
+    - uuid: a863169ec877487194f583040ef92f2d
+      name: Lab Escola - Visao Geral
+      pages:
+      - name: Desempenho
+        widgets:
+        - type: graph
+          name: CPU - Utilizacao
+          width: '36'
+          height: '5'
+          fields:
+          - type: GRAPH
+            name: graphid.0
+            value:
+              host: Template Lab Escola
+              name: CPU - Utilizacao e Idle
+          - type: STRING
+            name: reference
+            value: LABAA
+        - type: graph
+          name: RAM - Utilizacao
+          x: '36'
+          width: '36'
+          height: '5'
+          fields:
+          - type: GRAPH
+            name: graphid.0
+            value:
+              host: Template Lab Escola
+              name: RAM - Disponivel vs Em uso
+          - type: STRING
+            name: reference
+            value: LABAB
+        - type: graphprototype
+          name: Disco - Uso por particao
+          y: '5'
+          width: '72'
+          height: '5'
+          fields:
+          - type: INTEGER
+            name: columns
+            value: '2'
+          - type: GRAPH_PROTOTYPE
+            name: graphid.0
+            value:
+              host: Template Lab Escola
+              name: Disco {#FSLABEL}({#FSNAME}) - Uso de espaco (%)
+          - type: STRING
+            name: reference
+            value: LABAC
+        - type: graphprototype
+          name: Rede - Trafego por interface
+          y: '10'
+          width: '72'
+          height: '5'
+          fields:
+          - type: INTEGER
+            name: columns
+            value: '1'
+          - type: GRAPH_PROTOTYPE
+            name: graphid.0
+            value:
+              host: Template Lab Escola
+              name: Rede {#IFNAME}({#IFALIAS}) - Trafego
+          - type: STRING
+            name: reference
+            value: LABAD
+    valuemaps:
+    - uuid: 7435bd4ae4b7473488c883c5de1b0eb8
+      name: Windows service state
+      mappings:
+      - value: '0'
+        newvalue: Running
+      - value: '1'
+        newvalue: Paused
+      - value: '2'
+        newvalue: Start pending
+      - value: '3'
+        newvalue: Stop pending
+      - value: '4'
+        newvalue: Continue pending
+      - value: '5'
+        newvalue: Stop pending
+      - value: '6'
+        newvalue: Stopped
+      - value: '7'
+        newvalue: Unknown
+      - value: '255'
+        newvalue: No such service
+    - uuid: 7d7563448df14f5f8f28d4a14627dd58
+      name: Zabbix agent availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: df95f6f82cc54a69a49ed7c153561e4a
+      name: Windows activation status
+      mappings:
+      - value: '-1'
+        newvalue: Erro ao verificar
+      - value: '0'
+        newvalue: NAO ATIVADO
+      - value: '1'
+        newvalue: Ativado
+    - uuid: 8e1a4c9f3b2d4e7f9a0b6c8d2e4f1a3b
+      name: Win32_NetworkAdapter NetConnectionStatus
+      mappings:
+      - value: '0'
+        newvalue: Disconnected
+      - value: '1'
+        newvalue: Connecting
+      - value: '2'
+        newvalue: Connected
+      - value: '3'
+        newvalue: Disconnecting
+      - value: '4'
+        newvalue: Hardware Not Present
+      - value: '5'
+        newvalue: Hardware Disabled
+      - value: '6'
+        newvalue: Hardware Malfunction
+      - value: '7'
+        newvalue: Media Disconnected
+    - uuid: 9dc1cffcd4254ae29a092593f1ce867d
+      name: Zabbix agent ping status
+      mappings:
+      - value: '1'
+        newvalue: Up
+  triggers:
+  - uuid: c4e5ecd5cb4d40e0b4a89818d6bf0eff
+    expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\% Idle
+      Time"],5m)<2
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\%
+      Idle Time"],5m)>=5
+    name: CPU completamente saturada em {HOST.NAME}
+    opdata: 'Idle: {ITEM.LASTVALUE1}'
+    priority: DISASTER
+    description: CPU com menos de 2% de idle por 5 minutos. PC provavelmente congelado.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: fd2a81dd15614b3d8826fdb06e905b80
+    expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\% Idle
+      Time"],5m)<10
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\%
+      Idle Time"],5m)>=15
+    name: CPU critica (>90%) em {HOST.NAME}
+    opdata: 'Idle: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: CPU acima de 90% por 5 minutos. PC muito lento.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: baece332b2514c65912a3bce74595b9e
+    expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\% Idle
+      Time"],5m)<25
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\%
+      Idle Time"],5m)>=30
+    name: CPU alta (>75%) em {HOST.NAME}
+    opdata: 'Idle: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: CPU acima de 75% por 5 minutos.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: ed88994cab6845fe9064a7cb1902feed
+    expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\% Idle
+      Time"],10m)<40
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\Processor(_Total)\%
+      Idle Time"],10m)>=45
+    name: CPU elevada (>60%) em {HOST.NAME}
+    opdata: 'Idle: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: CPU acima de 60% por 10 minutos.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: 066348ca23ab41b3bd0fa4a7b3891012
+    expression: last(/Template Lab Escola/vm.memory.size[pavailable])<5
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/vm.memory.size[pavailable])>=8
+    name: RAM critica - menos de 5% livre em {HOST.NAME}
+    opdata: 'Disponivel: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Menos de 5% de RAM. Windows usa intensamente o arquivo de paginacao.
+    tags:
+    - tag: scope
+      value: capacity
+  - uuid: 22718dc8db804f3aa5788ecf8bde0b2f
+    expression: last(/Template Lab Escola/vm.memory.size[pavailable])<10
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/vm.memory.size[pavailable])>=12
+    name: RAM baixa - menos de 10% livre em {HOST.NAME}
+    opdata: 'Disponivel: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: Menos de 10% de RAM. PC comeca a ficar lento.
+    tags:
+    - tag: scope
+      value: capacity
+  - uuid: 702d47688c5844649fdfc2f0aa78a978
+    expression: avg(/Template Lab Escola/vm.memory.size[pavailable],10m)<20
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/vm.memory.size[pavailable],10m)>=22
+    name: RAM em aviso - menos de 20% livre em {HOST.NAME}
+    opdata: 'Disponivel: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Menos de 20% de RAM por 10 minutos.
+    tags:
+    - tag: scope
+      value: capacity
+  - uuid: 6c5b364fec97406daea233c565f90531
+    expression: avg(/Template Lab Escola/perf_counter_en["\Memory\Pages/sec"],5m)>1000
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\Memory\Pages/sec"],5m)<=500
+    name: Paginacao de memoria excessiva em {HOST.NAME}
+    opdata: 'Pages/sec: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: Mais de 1000 paginas/seg trocadas com o disco. Falta de RAM.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: 237bc80da83b47bbbe5374244b75acbf
+    expression: last(/Template Lab Escola/system.uptime)<300
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/system.uptime)>=600
+    name: PC reiniciou recentemente em {HOST.NAME}
+    opdata: 'Uptime: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Uptime abaixo de 5 minutos. Reinicio recente detectado.
+    manual_close: 'YES'
+    tags:
+    - tag: scope
+      value: notice
+  - uuid: c541187f4c5e4093acdcd14d1769f9a8
+    expression: max(/Template Lab Escola/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0
+    name: Agente Zabbix indisponivel em {HOST.NAME}
+    priority: AVERAGE
+    description: O agente nao responde. PC pode estar desligado ou servico parou.
+    manual_close: 'YES'
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 4a74a379ee1a493d8be833abe674d143
+    expression: last(/Template Lab Escola/service.info[Spooler,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[Spooler,state])=0
+    name: Servico de impressao (Spooler) parado em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: Print Spooler parou. Nenhum PC do laboratorio consegue imprimir.
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 8565abf78529409dae00fa9e5baf84f6
+    expression: last(/Template Lab Escola/service.info[WinDefend,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[WinDefend,state])=0
+    name: Windows Defender parado em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Antivirus Windows Defender parou. PC sem protecao. Risco de seguranca.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: 291139a52ee748eca5bc53361ca712bf
+    expression: last(/Template Lab Escola/service.info[wuauserv,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[wuauserv,state])=0
+    name: Windows Update parado em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Servico Windows Update parou. PC nao recebera atualizacoes automaticas.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: aef59bff5cc149ec8c05571f8429cf68
+    expression: last(/Template Lab Escola/service.info[W32Time,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[W32Time,state])=0
+    name: Sincronizacao de horario (W32Time) parada em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Servico de horario parou. Relogio do PC pode desincronizar.
+    tags:
+    - tag: scope
+      value: notice
+  - uuid: 94ad1ef21fe64699902fa23d4ec2291e
+    expression: max(/Template Lab Escola/temperatura.cpu.celsius,5m)>{$CPU.TEMP.WARN}
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: max(/Template Lab Escola/temperatura.cpu.celsius,5m)<={$CPU.TEMP.WARN}-5
+    name: CPU superaquecendo - aviso em {HOST.NAME}
+    opdata: 'Temperatura: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Temperatura da CPU acima de {$CPU.TEMP.WARN}C. Verifique ventilacao.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: a2067dd214a04cd4a5017beeb178e0b6
+    expression: max(/Template Lab Escola/temperatura.cpu.celsius,5m)>{$CPU.TEMP.CRIT}
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: max(/Template Lab Escola/temperatura.cpu.celsius,5m)<={$CPU.TEMP.CRIT}-5
+    name: CPU superaquecendo - CRITICO em {HOST.NAME}
+    opdata: 'Temperatura: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Temperatura critica acima de {$CPU.TEMP.CRIT}C. Risco de dano ao
+      hardware.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: 08d32f12611a485c818706b6236bc370
+    expression: last(/Template Lab Escola/proc.num[MsMpEng.exe])=0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/proc.num[MsMpEng.exe])>=1
+    name: Processo do Windows Defender ausente em {HOST.NAME}
+    opdata: 'Instancias: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: MsMpEng.exe nao encontrado. Antivirus pode ter sido desativado.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: 3a189acd2fc94b7e8498c6c3c8f06900
+    expression: last(/Template Lab Escola/proc.num[])>350
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/proc.num[])<=300
+    name: Numero anormal de processos em {HOST.NAME}
+    opdata: 'Processos: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Mais de 350 processos ativos. Pode indicar malware.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: c41c1ce9c08e41fda82ef9c246ea97d4
+    expression: last(/Template Lab Escola/windows.updates.pending)>{$WINDOWS.UPDATES.MAX}
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.updates.pending)<={$WINDOWS.UPDATES.MAX}
+    name: Muitas atualizacoes pendentes em {HOST.NAME}
+    opdata: 'Pendentes: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Mais de {$WINDOWS.UPDATES.MAX} atualizacoes pendentes. REQUER UserParameter
+      - veja descricao do template.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: a2f97ad0bbf54551b1a5b4403a0bfe2e
+    expression: last(/Template Lab Escola/windows.activation.status)=0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.activation.status)=1
+    name: Windows NAO ATIVADO em {HOST.NAME}
+    opdata: 'Status: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Windows sem ativacao valida. REQUER UserParameter - veja descricao
+      do template.
+    tags:
+    - tag: scope
+      value: compliance
+  - uuid: 433af14d0de748b2aaa58de334b82217
+    expression: abs(last(/Template Lab Escola/system.localtime)-now())>300
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: abs(last(/Template Lab Escola/system.localtime)-now())<=60
+    name: Relogio do PC desincronizado em {HOST.NAME}
+    opdata: Diferenca detectada
+    priority: WARNING
+    description: Relogio do PC difere mais de 5 minutos do servidor Zabbix. Causa
+      problemas em autenticacao de dominio.
+    manual_close: 'YES'
+    tags:
+    - tag: scope
+      value: notice
+  - uuid: f9db9c526e3a4c839f7452b3b93973a0
+    expression: last(/Template Lab Escola/service.info[AudioSrv,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[AudioSrv,state])=0
+    name: Servico de audio parado em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Servico de audio do Windows parou. PCs sem som.
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: d1de39f1100441c0bea75ab7b9b50e30
+    expression: last(/Template Lab Escola/service.info[EventLog,state])<>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/service.info[EventLog,state])=0
+    name: Servico de Log de Eventos parado em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: EventLog parou. Erros criticos do sistema nao serao registrados.
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 4119ee934a704fc7ba33a1089821d8af
+    expression: last(/Template Lab Escola/wmi.get[root/SecurityCenter2,"SELECT productState
+      FROM AntiVirusProduct WHERE displayName='Windows Defender'"])=397312
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/wmi.get[root/SecurityCenter2,"SELECT
+      productState FROM AntiVirusProduct WHERE displayName='Windows Defender'"])=397568
+    name: Antivirus DESATIVADO via SecurityCenter em {HOST.NAME}
+    opdata: 'Estado: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Windows Defender desativado (productState=397312). PC sem protecao
+      de antivirus.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: 009b4635df264ab7901a8835e1801e48
+    expression: avg(/Template Lab Escola/perf_counter_en["\LogicalDisk(_Total)\% Disk
+      Time"],5m)>80
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/perf_counter_en["\LogicalDisk(_Total)\%
+      Disk Time"],5m)<=60
+    name: Disco com alta utilizacao (>80%) em {HOST.NAME}
+    opdata: 'Ocupacao: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: Disco ocupado mais de 80% do tempo por 5 minutos. Pode indicar HDD
+      lento ou falhando.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: a262a1440bc848bda78e3b37f76e850d
+    expression: max(/Template Lab Escola/icmpping,5m)=0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/icmpping)=1
+    name: PC OFFLINE em {HOST.NAME}
+    event_name: 'PC offline: {HOST.NAME} nao responde ao ping'
+    opdata: 'Status: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: O PC nao responde ao ping por 5 minutos. Pode estar desligado, com
+      problema de rede ou travado.
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 6009f1dd2daa4ee2a1b6acf8b12c28b1
+    expression: last(/Template Lab Escola/icmppingloss)>20
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/icmppingloss)<=5
+    name: Perda de pacotes alta em {HOST.NAME}
+    event_name: 'Rede: perda de pacotes acima de 20% em {HOST.NAME}'
+    opdata: 'Perda: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: 'Mais de 20% dos pacotes sendo perdidos. Indica problema fisico:
+      cabo danificado ou porta de switch com falha.'
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 23be5efbd82d4c82ab5ce52a14700b62
+    expression: avg(/Template Lab Escola/icmppingsec,5m)>0.2
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: avg(/Template Lab Escola/icmppingsec,5m)<=0.1
+    name: Latencia de rede alta em {HOST.NAME}
+    event_name: 'Rede: ping acima de 200ms por 5 minutos em {HOST.NAME}'
+    opdata: 'Latencia: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Tempo de resposta do ping acima de 200ms por 5 minutos. Rede lenta
+      ou congestionada.
+    tags:
+    - tag: scope
+      value: performance
+  - uuid: 46fe7205dc7842e39c8bb5b238711bf5
+    expression: max(/Template Lab Escola/icmpping[8.8.8.8],5m)=0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/icmpping[8.8.8.8])=1
+    name: PC sem acesso a internet em {HOST.NAME}
+    event_name: 'Internet: PC nao alcanca 8.8.8.8 em {HOST.NAME}'
+    opdata: 'Status: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: O PC nao consegue pingar 8.8.8.8 por 5 minutos. Diferencia problema
+      local (so esse PC) de problema geral (internet da escola caiu).
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 85929ac5070445478c10b722379f6a69
+    expression: last(/Template Lab Escola/windows.firewall.status)=0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.firewall.status)=1
+    name: Firewall do Windows desativado em {HOST.NAME}
+    event_name: 'SEGURANCA: firewall desativado em {HOST.NAME}'
+    opdata: 'Status: {ITEM.LASTVALUE1} (0=Desligado, 1=Ligado)'
+    priority: HIGH
+    description: O Firewall do Windows está desativado em um ou mais perfis.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: e7d360201eb54e04aa3b80a238a92596
+    expression: last(/Template Lab Escola/windows.usb.count)>0
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.usb.count)=0
+    name: Dispositivo USB de armazenamento detectado em {HOST.NAME}
+    event_name: 'USB: pendrive ou HD externo conectado em {HOST.NAME}'
+    opdata: 'Dispositivos: {ITEM.LASTVALUE1}'
+    priority: WARNING
+    description: Um dispositivo USB de armazenamento foi conectado. Pode ser pendrive
+      de aluno com conteudo indevido ou virus.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: 3a31e69dffe54be0a96eb6e44c549d04
+    expression: last(/Template Lab Escola/windows.defender.daysoutdated)>3
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.defender.daysoutdated)<=1
+    name: Definicoes do Defender desatualizadas em {HOST.NAME}
+    event_name: 'SEGURANCA: Defender sem atualizacao ha mais de 3 dias em {HOST.NAME}'
+    opdata: 'Dias sem atualizar: {ITEM.LASTVALUE1}'
+    priority: AVERAGE
+    description: As definicoes de virus do Windows Defender estao desatualizadas ha
+      mais de 3 dias. PC com protecao reduzida.
+    tags:
+    - tag: scope
+      value: security
+  - uuid: 672f5c06bc244c11b777d65b27f9af73
+    expression: last(/Template Lab Escola/windows.login.failures)>10
+    recovery_mode: RECOVERY_EXPRESSION
+    recovery_expression: last(/Template Lab Escola/windows.login.failures)<=3
+    name: Possiveis tentativas de invasao em {HOST.NAME}
+    event_name: 'SEGURANCA: mais de 10 falhas de login na ultima hora em {HOST.NAME}'
+    opdata: 'Falhas: {ITEM.LASTVALUE1}'
+    priority: HIGH
+    description: Mais de 10 tentativas de login falhas na ultima hora. Pode indicar
+      tentativa de acesso nao autorizado.
+    tags:
+    - tag: scope
+      value: security
+  graphs:
+  - uuid: 19fd42a179f24ab1b37789d77f6bdb9d
+    name: CPU - Utilizacao e Idle
+    ymin_type_1: FIXED
+    ymax_type_1: FIXED
+    graph_items:
+    - drawtype: GRADIENT_LINE
+      color: F63100
+      item:
+        host: Template Lab Escola
+        key: system.cpu.util
+    - sortorder: '1'
+      drawtype: GRADIENT_LINE
+      color: 199C0D
+      item:
+        host: Template Lab Escola
+        key: perf_counter_en["\Processor(_Total)\% Idle Time"]
+  - uuid: 15a5a0922a684601bef03ece6b97065a
+    name: RAM - Disponivel vs Em uso
+    ymin_type_1: FIXED
+    ymax_type_1: FIXED
+    graph_items:
+    - drawtype: GRADIENT_LINE
+      color: 199C0D
+      item:
+        host: Template Lab Escola
+        key: vm.memory.size[pavailable]
+    - sortorder: '1'
+      drawtype: GRADIENT_LINE
+      color: F63100
+      item:
+        host: Template Lab Escola
+        key: vm.memory.size[pused]
+  - uuid: 3137f36c57564bc98e62fc321eba9f4b
+    name: Sistema - Uptime
+    graph_items:
+    - drawtype: GRADIENT_LINE
+      color: 199C0D
+      item:
+        host: Template Lab Escola
+        key: system.uptime
+  - uuid: 5f6fe67cf8cd4fa1a0355ee7bd4495fd
+    name: Rede - Latencia e disponibilidade
+    graph_items:
+    - drawtype: GRADIENT_LINE
+      color: 199C0D
+      item:
+        host: Template Lab Escola
+        key: icmppingsec
+    - sortorder: '1'
+      drawtype: GRADIENT_LINE
+      color: F63100
+      item:
+        host: Template Lab Escola
+        key: icmppingloss
+  - uuid: 22877ce2eed147b49586dcc1dfc65e3e
+    name: Disco - Velocidade de leitura e escrita
+    graph_items:
+    - drawtype: GRADIENT_LINE
+      color: 199C0D
+      item:
+        host: Template Lab Escola
+        key: perf_counter_en["\LogicalDisk(_Total)\Disk Read Bytes/sec"]
+    - sortorder: '1'
+      drawtype: GRADIENT_LINE
+      color: F63100
+      item:
+        host: Template Lab Escola
+        key: perf_counter_en["\LogicalDisk(_Total)\Disk Write Bytes/sec"]
