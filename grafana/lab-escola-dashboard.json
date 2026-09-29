@@ -1,0 +1,2120 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_ZABBIX",
+      "label": "Zabbix",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "alexanderzobnin-zabbix-datasource",
+      "pluginName": "Zabbix"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "alexanderzobnin-zabbix-datasource",
+      "name": "Zabbix",
+      "version": "4.0.0"
+    }
+  ],
+  "title": "Lab Escola — Monitoramento Completo",
+  "uid": "labf-completo-v4",
+  "schemaVersion": 36,
+  "version": 4,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "group",
+        "label": "Laboratorio",
+        "type": "custom",
+        "query": "LABF1,LABF2,LABF3",
+        "current": {
+          "text": "LABF1",
+          "value": "LABF1"
+        },
+        "options": [
+          {
+            "text": "LABF1",
+            "value": "LABF1",
+            "selected": true
+          },
+          {
+            "text": "LABF2",
+            "value": "LABF2",
+            "selected": false
+          },
+          {
+            "text": "LABF3",
+            "value": "LABF3",
+            "selected": false
+          }
+        ],
+        "multi": false,
+        "includeAll": false,
+        "refresh": 0,
+        "sort": 0
+      },
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "alexanderzobnin-zabbix-datasource",
+          "uid": "${DS_ZABBIX}"
+        },
+        "query": {
+          "queryType": "hosts",
+          "group": "$group",
+          "host": "/.*/"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {},
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 50,
+      "title": "📊 VISAO GERAL DO LAB — Resumo em tempo real",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 51,
+      "title": "Zabbix agent - Disponibilidade",
+      "description": "Indica se o agente Zabbix esta respondendo no host. Verde = agente ativo e comunicando com o servidor. Vermelho = host offline ou agente parado.",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "zabbix[host,agent,available]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DESCONHECIDO",
+                  "color": "orange"
+                },
+                "1": {
+                  "text": "DISPONIVEL",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "INDISPONIVEL",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 52,
+      "title": "CPU - Utilizacao total — Media Atual",
+      "description": "Media de utilizacao de CPU no momento atual entre os hosts selecionados. Permite identificar rapidamente se alguma maquina esta sobrecarregada.",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 1,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.cpu.util",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 53,
+      "title": "Sistema - Quantidade de usuarios logados",
+      "description": "Total de usuarios com sessao ativa no momento. Em um laboratorio escolar, este valor indica quantos alunos estao usando as maquinas agora.",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.users.num",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 54,
+      "title": "Windows - Atualizacoes pendentes",
+      "description": "Quantidade de atualizacoes do Windows aguardando instalacao. Maquinas desatualizadas representam risco de seguranca para o laboratorio.",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 1,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.updates.pending",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 100,
+      "title": "🟢 SISTEMA — Estado geral em tempo real",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 1,
+      "title": "CPU - Utilizacao total",
+      "description": "Percentual total de uso do processador em tempo real. Valores acima de 90% de forma continua indicam sobrecarga e podem travar a maquina do aluno.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.cpu.util",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "CPU - Carga media 1 minuto",
+      "description": "Media de processos aguardando CPU no ultimo minuto (load average). Valor acima do numero de nucleos do processador indica fila de execucao — sistema lento.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.cpu.load[percpu,avg1]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 4
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "CPU - Carga media 5 minutos",
+      "description": "Media de processos aguardando CPU nos ultimos 5 minutos. Complementa a carga de 1 minuto — se ambos estiverem altos, a sobrecarga e sustentada, nao pontual.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 18,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.cpu.load[percpu,avg5]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 4
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "RAM - Em uso (%)",
+      "description": "Percentual de memoria RAM em uso. Acima de 90% o Windows comeca a usar o disco como memoria virtual (swap), tornando a maquina muito lenta.",
+      "type": "gauge",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "vm.memory.size[pused]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 55,
+      "title": "RAM - Paginas por segundo",
+      "description": "Numero de paginas de memoria lidas ou gravadas no disco por segundo (paginacao). Valores altos indicam que o Windows esta compensando falta de RAM com o disco — causa lentidao critica.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 6,
+        "y": 15,
+        "w": 9,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "perf_counter_en[\"\\Memory\\Pages/sec\"]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "iops",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sistema - Uptime",
+      "description": "Tempo decorrido desde o ultimo boot do sistema. Util para identificar maquinas que foram reiniciadas inesperadamente ou que estao ligadas ha muito tempo sem manutencao.",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 15,
+        "w": 5,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.uptime",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dtdurations",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 300
+              },
+              {
+                "color": "green",
+                "value": 3600
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 56,
+      "title": "Sistema - Nome do usuario logado",
+      "description": "Exibe o nome do usuario atualmente logado em cada maquina. Permite identificar remotamente qual aluno esta em qual PC do laboratorio.",
+      "type": "stat",
+      "gridPos": {
+        "x": 20,
+        "y": 15,
+        "w": 4,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "wmi.get[root/cimv2,\"SELECT UserName FROM Win32_ComputerSystem\"]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "string",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 5,
+      "title": "CPU - Utilizacao total — Atual por Host",
+      "description": "Comparativo visual do uso de CPU entre todos os hosts selecionados no momento atual. Facilita identificar qual maquina esta com maior carga no laboratorio.",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "system.cpu.util",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 200,
+      "title": "🔵 PERFORMANCE — Gargalos de IO e carga de processos",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "title": "Disco - Percentual de tempo ocupado (IOPS)",
+      "description": "Percentual do tempo em que o disco esta ocupado com operacoes de leitura ou escrita. Acima de 85% de forma continua indica gargalo de armazenamento — causa lentidao perceptivel.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "perf_counter_en[\"\\LogicalDisk(_Total)% Disk Time\"]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Processos - Total em execucao",
+      "description": "Numero total de processos ativos no sistema operacional. Um numero muito alto pode indicar programas nao autorizados rodando ou malware consumindo recursos.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "proc.num[]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 150
+              },
+              {
+                "color": "red",
+                "value": 250
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Disco - Velocidade de leitura (bytes/s)",
+      "description": "Taxa de dados sendo lidos do disco por segundo. Picos elevados durante o uso normal podem indicar acesso intenso a arquivos grandes ou sistema operacional carregando muitos dados.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "perf_counter_en[\"\\LogicalDisk(_Total)\\Disk Read Bytes/sec\"]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Disco - Velocidade de escrita (bytes/s)",
+      "description": "Taxa de dados sendo gravados no disco por segundo. Escrita alta constante combinada com uso elevado de CPU pode indicar atualizacoes, logs excessivos ou atividade suspeita.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 38,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "perf_counter_en[\"\\LogicalDisk(_Total)\\Disk Write Bytes/sec\"]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Processos - Total em execucao — Atual por Host",
+      "description": "Comparativo do total de processos ativos entre todos os hosts. Permite identificar rapidamente qual maquina tem comportamento anormal em relacao as demais.",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 0,
+        "y": 46,
+        "w": 24,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "proc.num[]",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 300,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 150
+              },
+              {
+                "color": "red",
+                "value": 250
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 300,
+      "title": "🟡 REDE — Disponibilidade e latencia em tempo real",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "title": "Rede - Ping para o servidor Zabbix (online/offline)",
+      "description": "Verifica se o host esta acessivel via ICMP. Valor 1 = maquina online e respondendo. Valor 0 = maquina desligada, offline na rede ou com firewall bloqueando.",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 53,
+        "w": 8,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmpping",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OFFLINE",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "ONLINE",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Rede - Latencia do ping (segundos)",
+      "description": "Tempo de resposta do host ao ping ICMP em segundos. Latencia abaixo de 10ms e ideal em rede local. Valores acima de 100ms indicam problemas de conectividade ou congestionamento na rede do laboratorio.",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 53,
+        "w": 8,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmppingsec",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 13,
+      "title": "Rede - Perda de pacotes (%)",
+      "description": "Percentual de pacotes ICMP perdidos durante o teste de conectividade. Perda acima de 10% indica instabilidade na rede — afeta comunicacao entre os PCs e o servidor Zabbix.",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 53,
+        "w": 8,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmppingloss",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 14,
+      "title": "Rede - Latencia do ping (segundos) — Historico",
+      "description": "Historico de latencia ICMP para visualizar variacoes ao longo do tempo. Picos pontuais sao normais; latencia alta constante indica problema estrutural na rede.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 16,
+        "h": 9
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmppingsec",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Rede - Ping para o servidor Zabbix — Status por Host",
+      "description": "Visao consolidada do status de conectividade de todos os hosts. Verde = online. Vermelho = sem resposta. Ideal para checar rapidamente quais PCs estao ligados.",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 16,
+        "y": 59,
+        "w": 8,
+        "h": 9
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmpping",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 1,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OFFLINE"
+                },
+                "1": {
+                  "text": "ONLINE"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 16,
+      "title": "Rede - Perda de pacotes (%) — Historico",
+      "description": "Historico de perda de pacotes ICMP. Permite correlacionar eventos de instabilidade de rede com horarios especificos — ex: horario de aula com mais usuarios na rede.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 68,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "icmppingloss",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 400,
+      "title": "🔴 SEGURANCA — Eventos de seguranca e possiveis ameacas",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 76,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 17,
+      "title": "Seguranca - Falhas de login na ultima hora (contador)",
+      "description": "Quantidade de tentativas de autenticacao com falha nos ultimos 60 minutos (Evento Windows ID 4625). Valores altos podem indicar tentativa de acesso nao autorizado ou senha incorreta repetida.",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 77,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.login.failures",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 18,
+      "title": "Seguranca - Defender protecao em tempo real",
+      "description": "Indica se a protecao em tempo real do Windows Defender esta ativa. Se desativada, o computador fica vulneravel a virus e malware sem nenhuma barreira de protecao.",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 77,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.defender.realtime",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DESATIVADO",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "ATIVO",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 57,
+      "title": "Seguranca - Defender dias desde ultima atualizacao",
+      "description": "Quantidade de dias desde a ultima atualizacao das definicoes de virus do Windows Defender. Acima de 7 dias o antivirus pode nao reconhecer ameacas recentes.",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 77,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.defender.daysoutdated",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 7
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 19,
+      "title": "Seguranca - Firewall do Windows (perfis ativos)",
+      "description": "Verifica se o Firewall do Windows esta ativo. O firewall e a primeira linha de defesa contra acessos nao autorizados via rede. Deve estar sempre ativo nos PCs do laboratorio.",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 83,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.firewall.status",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DESATIVADO",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "ATIVO",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 20,
+      "title": "Seguranca - Dispositivos USB conectados",
+      "description": "Numero de dispositivos USB fisicamente conectados ao computador. Em ambiente escolar, USB nao autorizado pode ser usado para copiar dados ou instalar programas indevidos.",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 83,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.usb.count",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 58,
+      "title": "Windows - Atualizacoes pendentes",
+      "description": "Numero de atualizacoes do Windows aguardando instalacao. Sistemas desatualizados sao vulneraveis a exploits conhecidos. Recomendado manter abaixo de 5 atualizacoes pendentes.",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 83,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.updates.pending",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 21,
+      "title": "Seguranca - Falhas de login na ultima hora — Historico",
+      "description": "Evolucao das tentativas de login com falha ao longo do tempo. Picos em horarios especificos podem indicar tentativas coordenadas de acesso indevido.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 89,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.login.failures",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "title": "Seguranca - Dispositivos USB conectados — Historico",
+      "description": "Historico de conexoes USB ao longo do tempo. Permite identificar em qual horario um pendrive foi conectado em determinada maquina do laboratorio.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 89,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.usb.count",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "title": "Seguranca - Defender protecao em tempo real — Status por Host",
+      "description": "Comparativo do status do Defender em todos os hosts. Verde = protegido. Vermelho = maquina sem protecao ativa — requer atencao imediata do administrador.",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 0,
+        "y": 98,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.defender.realtime",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 1,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DESATIVADO"
+                },
+                "1": {
+                  "text": "ATIVO"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 24,
+      "title": "Seguranca - Firewall do Windows (perfis ativos) — Status por Host",
+      "description": "Comparativo do status do Firewall em todos os hosts. Qualquer host com firewall desativado e uma vulnerabilidade aberta na rede do laboratorio.",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 12,
+        "y": 98,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZABBIX}"
+      },
+      "targets": [
+        {
+          "group": "$group",
+          "host": "$host",
+          "application": "",
+          "item": "windows.firewall.status",
+          "queryType": "0",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 1,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DESATIVADO"
+                },
+                "1": {
+                  "text": "ATIVO"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      }
+    }
+  ]
+}
